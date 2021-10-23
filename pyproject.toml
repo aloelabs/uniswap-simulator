@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "uniswap-simulator"
+version = "0.1.0"
+description = ""
+authors = ["hayden Shively <haydenshively@gmail.com>"]
+readme = "README.md"
+packages = [{include = "uniswap_simulator"}]
+
+[tool.poetry.dependencies]
+python = "3.7"
+numpy = "^1.21.3"
+autopep8 = "^1.5.7"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
