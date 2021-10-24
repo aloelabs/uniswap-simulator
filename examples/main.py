@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from uniswap_simulator import GeometricBrownianMotion, Position, compare_to_hodl
 
 from .compounding_strategy import CompoundingStrategy
+from .split_compounding_strategy import SplitCompoundingStrategy
 
 
 def get_performance(args):
@@ -14,10 +15,12 @@ def get_performance(args):
     prices = gbm.sample(1000).astype('float64')
     time = np.arange(start=0, stop=prices.shape[0])
 
-    strategy = Position(prices[0], 1.0001 ** -887272,
-                        1.0001 ** 887272, 1.0/100)
+    # strategy = Position(prices[0], 1.0001 ** -887272,
+    #                     1.0001 ** 887272, 0.05/100)
     # strategy = CompoundingStrategy(prices[0], 1.0001 ** -887272,
     #                     1.0001 ** 887272, 0.05/100)
+    strategy = SplitCompoundingStrategy(prices[0], 1.0001 ** -887272,
+                                   1.0001 ** 887272, 0.05/100)
 
     assert np.all(prices < 1.0001 ** 887272), prices.max()
     return np.array(compare_to_hodl(strategy, prices, time))

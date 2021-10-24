@@ -6,7 +6,7 @@ from uniswap_simulator.position import Position
 class CompoundingStrategy(Position):
     epsilon = 0.001
 
-    def compound(self, fraction=0.99):
+    def _compound(self, fraction=0.99):
         if self._earned is None:
             return
 
@@ -21,5 +21,5 @@ class CompoundingStrategy(Position):
 
     def update(self, price: np.ndarray) -> tuple:
         res = super().update(price)
-        self.compound()
+        self._compound()
         return res
