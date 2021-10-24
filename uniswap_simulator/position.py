@@ -19,6 +19,10 @@ class Position:
         self._earned = None
 
     @property
+    def _price(self):
+        return np.square(self._price_sqrt)
+
+    @property
     def lower(self):
         return np.square(self._lower_sqrt)
 
@@ -44,6 +48,10 @@ class Position:
         return self._earned
 
     def update(self, price):
+        # If price movement is less than fee, it's not guaranteed that the AMM will
+        # be arb'd to match new price
+        should_update = np.absolute(price / self._price - 1) >= self._fee
+        price[~should_update] = self._price[~should_update]
         price_sqrt = np.sqrt(price)
 
         amounts_previous = amounts_for_liquidity(

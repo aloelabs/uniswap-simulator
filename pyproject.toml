@@ -10,6 +10,7 @@ packages = [{include = "uniswap_simulator"}]
 python = "3.7"
 numpy = "^1.21.3"
 autopep8 = "^1.5.7"
+matplotlib = "^3.4.3"
 
 [tool.poetry.dev-dependencies]
 
