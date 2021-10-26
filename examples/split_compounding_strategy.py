@@ -1,6 +1,6 @@
 import numpy as np
 
-from uniswap_simulator.position import Position
+from uniswap_simulator import Position
 
 
 class SplitCompoundingStrategy():
