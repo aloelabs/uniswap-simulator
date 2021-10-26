@@ -108,3 +108,18 @@ class Position:
 
         self._earned -= earned
         return burned + earned
+
+    def burn_at(self, mask, fraction=1.0):
+        liquidity_to_burn = self._liquidity * fraction * mask
+        self._liquidity -= liquidity_to_burn
+
+        burned = amounts_for_liquidity(
+            self._price_sqrt,
+            self._lower_sqrt,
+            self._upper_sqrt,
+            liquidity_to_burn
+        )
+        earned = self._earned * fraction * mask
+
+        self._earned -= earned
+        return burned + earned
