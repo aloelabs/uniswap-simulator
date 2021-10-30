@@ -28,16 +28,15 @@ class SplitCompoundingStrategy():
         return amounts
 
     def _compound(self, price, fraction=0.99):
-        if self.position._earned is None:
-            return
-        
         earned = self.position._earned.copy()
         earned += self.position_l.burn()
         earned += self.position_r.burn()
 
         edge = price.copy()
-        edge[price <= self.position.lower] = self.position.upper
-        edge[edge > self.position.upper] = self.position.upper
+        mask = price <= self.position.lower
+        edge[mask] = self.position.upper[mask]
+        mask = edge > self.position.upper
+        edge[mask] = self.position.upper[mask]
         self.position_l = Position(
             price,
             self.position.lower,
@@ -46,8 +45,10 @@ class SplitCompoundingStrategy():
         )
 
         edge = price.copy()
-        edge[price >= self.position.upper] = self.position.lower
-        edge[edge < self.position.lower] = self.position.lower
+        mask = price >= self.position.upper
+        edge[mask] = self.position.lower[mask]
+        mask = edge < self.position.lower
+        edge[mask] = self.position.lower[mask]
         self.position_r = Position(
             price,
             edge,

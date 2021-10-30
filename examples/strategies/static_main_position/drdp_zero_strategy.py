@@ -52,7 +52,6 @@ class DRDP0Strategy:
 
         # change basis of `amounts[...,0]` so that it represents wealth in each asset
         amounts[...,0] *= price
-        print((amounts[...,0] / amounts[...,1]).mean())
         excess0 = amounts[...,0] > amounts[...,1]
         # compute active trading range (defined by lower and upper ticks)
         active_ticks = np.log(price) / np.log(1.0001)
