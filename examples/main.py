@@ -8,23 +8,33 @@ from .strategies.dynamic_main_position.drdp_zero_strategy import DRDP0Strategy
 # from .strategies.static_main_position.drdp_zero_strategy import DRDP0Strategy
 from .strategies.dynamic_main_position.split_compounding_strategy import SplitCompoundingStrategy
 # from .strategies.static_main_position.split_compounding_strategy import SplitCompoundingStrategy
+from .strategies.dynamic_main_position.liquidity_silos import LiquiditySilos
+
+
+MIN_TICK = -887272
+MAX_TICK = +887272
 
 
 def get_performance(args):
     p0, mu, sigma, dt, T = args
 
     gbm = GeometricBrownianMotion(p0, mu, sigma, dt, T)
-    prices = gbm.sample(1000).astype('float64')
+    prices = gbm.sample(10000).astype('float64')
+    prices = np.clip(
+        prices,
+        a_min=1.0001 ** MIN_TICK,
+        a_max=1.0001 ** MAX_TICK
+    )
     time = np.arange(start=0, stop=prices.shape[0])
 
-    lower = np.full_like(prices[0], 1.0001 ** (-887272 / 1))
-    upper = np.full_like(prices[0], 1.0001 ** (+887272 / 1))
+    lower = np.full_like(prices[0], 1.0001 ** (MIN_TICK / 64))
+    upper = np.full_like(prices[0], 1.0001 ** (MAX_TICK / 64))
 
-    strategy = Position(prices[0], lower, upper, 0.05/100)
+    # strategy = Position(prices[0], lower, upper, 0.01/100)
     # strategy = DRDP0Strategy(prices[0], lower, upper, 0.05/100)
     # strategy = SplitCompoundingStrategy(prices[0], lower, upper, 0.05/100)
+    strategy = LiquiditySilos(prices[0], lower, upper, 1.0/100)
 
-    assert np.all(prices < 1.0001 ** 887272), prices.max()
     return np.array(compare_to_hodl(strategy, prices, time))
 
 

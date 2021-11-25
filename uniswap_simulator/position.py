@@ -119,7 +119,7 @@ class Position:
             self._upper_sqrt,
             liquidity_to_burn
         )
-        earned = self._earned * fraction * mask
+        earned = self._earned * fraction * mask[..., np.newaxis]
 
         self._earned -= earned
         return burned + earned
