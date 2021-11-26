@@ -11,6 +11,7 @@ python = "3.7"
 numpy = "^1.21.3"
 autopep8 = "^1.5.7"
 matplotlib = "^3.4.3"
+scipy = "^1.7.3"
 
 [tool.poetry.dev-dependencies]
 

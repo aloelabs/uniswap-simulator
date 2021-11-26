@@ -1,4 +1,6 @@
 from multiprocessing import Pool
+from time import sleep
+from random import random
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,6 +15,9 @@ MAX_TICK = +887272
 
 
 def get_performance(args):
+    # sleep so that threads don't go swallowing memory for the GBM all at once
+    sleep(random() * 10.0)
+
     p0, mu, sigma, dt, T = args
 
     gbm = GeometricBrownianMotion(p0, mu, sigma, dt, T)
@@ -22,15 +27,14 @@ def get_performance(args):
         a_min=1.0001 ** MIN_TICK,
         a_max=1.0001 ** MAX_TICK
     )
-    time = np.arange(start=0, stop=prices.shape[0])
 
-    lower = np.full_like(prices[0], 1.0001 ** (MIN_TICK / 256))
-    upper = np.full_like(prices[0], 1.0001 ** (MAX_TICK / 256))
+    lower = np.full_like(prices[0], 1.0001 ** (MIN_TICK / 1))
+    upper = np.full_like(prices[0], 1.0001 ** (MAX_TICK / 1))
 
     # strategy = Position(prices[0], lower, upper, 1.00/100)
-    strategy = CompoundingStrategy(prices[0], lower, upper, 0.01/100)
+    strategy = CompoundingStrategy(prices[0], lower, upper, 25.0/100)
 
-    return np.array(compare_to_hodl(strategy, prices, time))
+    return np.array(compare_to_hodl(strategy, prices, T))
 
 
 def main():
@@ -42,8 +46,8 @@ def main():
     x_grid, y_grid = np.meshgrid(mus, sigmas)
     z_grid = np.zeros((*x_grid.shape, 2))
 
-    dt = 1. / 60.
-    T = 31.
+    dt = 1. / 20000.
+    T = 1.
 
     ij = []
     args = []
@@ -61,7 +65,6 @@ def main():
     np.save('results/xgrid.npy', x_grid)
     np.save('results/ygrid.npy', y_grid)
     np.save('results/zgrid.npy', z_grid)
-    print(z_grid.max())
 
     plt.clf()
     plt.figure(1)
@@ -70,6 +73,7 @@ def main():
 
     # Plot the surface
     Z = z_grid[..., 0] - z_grid[..., 1]
+    print(Z.max())
     ax.plot_surface(
         x_grid,
         y_grid,
@@ -85,7 +89,6 @@ def main():
     ax.set_xlabel('$\mu$')
     ax.set_ylabel('$\sigma$')
     ax.set_zlabel('$G - G_{HODL}$')
-    ax.set_zlim3d(-.01, +.01)
 
     plt.savefig('results/surf.png')
 
