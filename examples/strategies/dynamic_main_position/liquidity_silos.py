@@ -11,7 +11,7 @@ class LiquiditySilos():
             (2 * np.log(1.0001))
 
         self.portion_in_uni = 1.0 - np.power(1.0001, -self.half_width / 2.0)
-        print('Uniswap %: {:.3f}'.format(self.portion_in_uni.mean()))
+        print('{:.3f}% in Uniswap'.format(100 * self.portion_in_uni.mean()))
 
         self.silos = None
 
@@ -37,23 +37,16 @@ class LiquiditySilos():
         amounts = self.position.update(price) + self.silos
 
         center = np.log(price) / np.log(1.0001)
-        lower = np.zeros_like(center)
-        upper = np.zeros_like(center)
-
-        mask = np.any((center < lower, center > upper), axis=0)
-        lower[mask] = (center - self.half_width)[mask]
-        upper[mask] = (center + self.half_width)[mask]
+        lower = center - self.half_width
+        upper = center + self.half_width
         lower = np.power(1.0001, lower)
         upper = np.power(1.0001, upper)
 
-        burned = self.position.burn_at(mask)
-        self.position._lower_sqrt[mask] = np.sqrt(lower[mask])
-        self.position._upper_sqrt[mask] = np.sqrt(upper[mask])
+        burned = self.position.burn()
+        to_mint = (burned + self.silos) * self.portion_in_uni[..., np.newaxis]
 
-        to_mint = (burned + self.silos * mask[..., np.newaxis]) * self.portion_in_uni[..., np.newaxis]
+        self.position = Position(self.position._price, lower, upper, self.position.fee)
         used = self.position.mint(to_mint[..., 0], to_mint[..., 1])
         self.silos += burned - used
-
-        # print((amounts[...,1] / (amounts[...,1] + amounts[...,0] * price)).mean())
 
         return amounts
