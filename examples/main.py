@@ -2,13 +2,10 @@ from multiprocessing import Pool
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 from uniswap_simulator import GeometricBrownianMotion, Position, compare_to_hodl
 
-from .strategies.dynamic_main_position.drdp_zero_strategy import DRDP0Strategy
-# from .strategies.static_main_position.drdp_zero_strategy import DRDP0Strategy
-from .strategies.dynamic_main_position.split_compounding_strategy import SplitCompoundingStrategy
-# from .strategies.static_main_position.split_compounding_strategy import SplitCompoundingStrategy
-from .strategies.dynamic_main_position.liquidity_silos import LiquiditySilos
+from .strategies.static_main_position.compounding_strategy import CompoundingStrategy
 
 
 MIN_TICK = -887272
@@ -19,7 +16,7 @@ def get_performance(args):
     p0, mu, sigma, dt, T = args
 
     gbm = GeometricBrownianMotion(p0, mu, sigma, dt, T)
-    prices = gbm.sample(10000).astype('float64')
+    prices = gbm.sample(1000).astype('float64')
     prices = np.clip(
         prices,
         a_min=1.0001 ** MIN_TICK,
@@ -27,13 +24,11 @@ def get_performance(args):
     )
     time = np.arange(start=0, stop=prices.shape[0])
 
-    lower = np.full_like(prices[0], 1.0001 ** (MIN_TICK / 64))
-    upper = np.full_like(prices[0], 1.0001 ** (MAX_TICK / 64))
+    lower = np.full_like(prices[0], 1.0001 ** (MIN_TICK / 256))
+    upper = np.full_like(prices[0], 1.0001 ** (MAX_TICK / 256))
 
-    # strategy = Position(prices[0], lower, upper, 0.01/100)
-    # strategy = DRDP0Strategy(prices[0], lower, upper, 0.05/100)
-    # strategy = SplitCompoundingStrategy(prices[0], lower, upper, 0.05/100)
-    strategy = LiquiditySilos(prices[0], lower, upper, 1.0/100)
+    # strategy = Position(prices[0], lower, upper, 1.00/100)
+    strategy = CompoundingStrategy(prices[0], lower, upper, 0.01/100)
 
     return np.array(compare_to_hodl(strategy, prices, time))
 
@@ -71,20 +66,25 @@ def main():
     plt.clf()
     plt.figure(1)
     ax = plt.axes(projection='3d')
-    ax.view_init(32, -121)
+    ax.view_init(32, -130)
 
     # Plot the surface
+    Z = z_grid[..., 0] - z_grid[..., 1]
     ax.plot_surface(
         x_grid,
         y_grid,
-        z_grid[..., 0] - z_grid[..., 1],
+        Z,
         cmap='rainbow',
         linewidth=0,
         antialiased=True
     )
+    m = cm.ScalarMappable(cmap=cm.rainbow)
+    m.set_array(Z)
+    plt.colorbar(m)
+
     ax.set_xlabel('$\mu$')
     ax.set_ylabel('$\sigma$')
-    ax.set_zlabel('$G - G_{hodl}$')
+    ax.set_zlabel('$G - G_{HODL}$')
     ax.set_zlim3d(-.01, +.01)
 
     plt.savefig('results/surf.png')

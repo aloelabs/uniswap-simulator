@@ -50,7 +50,10 @@ class Position:
     def update(self, price):
         # If price movement is less than fee, it's not guaranteed that the AMM will
         # be arb'd to match new price
-        should_update = np.absolute(price / self._price - 1) >= self._fee
+        should_update = np.any((
+            price / self._price > 1 / (1 - self._fee),
+            price / self._price < 1 - self._fee
+        ), axis=0)
         price[~should_update] = self._price[~should_update]
         price_sqrt = np.sqrt(price)
 
