@@ -4,7 +4,7 @@ import numpy as np
 INITIAL_INVENTORY0 = 10000
 
 
-def compare_to_hodl(strategy, prices, time):
+def compare_to_hodl(strategy, prices, T):
     # price trajectories should start from the same value (at t=0)
     assert prices[0].std() == 0.
     initial_price = prices[0].mean()
@@ -33,8 +33,8 @@ def compare_to_hodl(strategy, prices, time):
     y = values.copy()
 
     y = y.sum(axis=2) / hodl[0]
-    G_end_point = np.log(y[-1]).mean() / time[-1]
+    G_end_point = np.log(y[-1]).mean() / T
     y = hodl[-1] / hodl[0]
-    G_end_point_hodl = np.log(y).mean() / time[-1]
+    G_end_point_hodl = np.log(y).mean() / T
 
     return G_end_point, G_end_point_hodl

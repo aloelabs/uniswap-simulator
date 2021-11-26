@@ -7,7 +7,7 @@ class PositionV2:
     def __init__(self, price, fee):
         self._price_sqrt = np.sqrt(price)
         self._fee = fee
-        self._gamma = 1. + fee
+        self._gamma = 1. - fee
 
         self._k = np.zeros_like(price)
         self._x = np.zeros_like(price)
@@ -44,9 +44,9 @@ class PositionV2:
 
         mask = price > self._price # where price is growing
 
-        a = -self._x * (2. + self._fee) + np.sqrt(np.square(self._x * self._fee) + 4 * self._gamma * self._k / price)
+        a = -self._x * (2. - self._fee) + np.sqrt(np.square(self._x * self._fee) + 4 * self._gamma * self._k / price)
         a /= 2. * self._gamma
-        b = -self._y * (2. + self._fee) + np.sqrt(np.square(self._y * self._fee) + 4 * self._gamma * self._k * price)
+        b = -self._y * (2. - self._fee) + np.sqrt(np.square(self._y * self._fee) + 4 * self._gamma * self._k * price)
         b /= 2. * self._gamma
 
         self._x[~mask] += a[~mask]

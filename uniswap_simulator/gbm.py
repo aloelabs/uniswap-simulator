@@ -16,7 +16,7 @@ class GeometricBrownianMotion:
             size=(self._n - 1, count)
         )
 
-        x = np.exp((self._mu - self._sigma ** 2 / 2) * self._dt + self._sigma * noise)
+        x = np.exp((self._mu - 0.5 * self._sigma ** 2) * self._dt + self._sigma * noise)
         x = np.pad(x, ((1, 0), (0, 0)), mode='constant', constant_values=1)
 
         return self._x0 * x.cumprod(axis=0)
