@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from uniswap_simulator import GeometricBrownianMotion, Position, compare_to_hodl
 
-from .strategies.static_main_position.compounding_strategy import CompoundingStrategy
+from strategies.static_main_position.compounding_strategy import CompoundingStrategy
 
 
 MIN_TICK = -887272
@@ -28,11 +28,11 @@ def get_performance(args):
         a_max=1.0001 ** MAX_TICK
     )
 
-    lower = np.full_like(prices[0], 1.0001 ** (MIN_TICK / 1))
-    upper = np.full_like(prices[0], 1.0001 ** (MAX_TICK / 1))
+    lower = np.full_like(prices[0], 1.0001 ** (MIN_TICK / 2))
+    upper = np.full_like(prices[0], 1.0001 ** (MAX_TICK / 2))
 
-    # strategy = Position(prices[0], lower, upper, 1.00/100)
-    strategy = CompoundingStrategy(prices[0], lower, upper, 25.0/100)
+    strategy = Position(prices[0], lower, upper, 5.00/100)
+    # strategy = CompoundingStrategy(prices[0], lower, upper, 5.0/100)
 
     return np.array(compare_to_hodl(strategy, prices, T))
 
